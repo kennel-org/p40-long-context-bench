@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+results/raw/*.log
+results/raw/*.txt
+results/raw/existing_server_smoke_context.csv
+results/processed/*.json
