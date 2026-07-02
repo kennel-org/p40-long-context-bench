@@ -98,6 +98,42 @@ Treat concurrency results as a tuned server-throughput measurement, not a strict
 EXTRA_ARGS="--cache-ram 0" scripts/run_llama_server.sh configs/p40_usb4_q8kv.env
 ```
 
+## Adding Another GPU
+
+When testing a new GPU, keep the benchmark shape the same and add a new config file under `configs/`.
+
+1. Copy the closest existing config:
+
+```bash
+cp configs/p40_usb4_q8kv.env configs/<gpu_label>_q8kv.env
+```
+
+2. Update at least these fields:
+
+```bash
+LABEL=<gpu_label>_q8kv
+CUDA_VISIBLE_DEVICES=<gpu_index>
+CTX_SIZE=<context_size>
+N_GPU_LAYERS=<gpu_layer_count>
+CACHE_TYPE_K=q8_0
+CACHE_TYPE_V=q8_0
+FLASH_ATTN=1
+```
+
+3. Run the same measurement flow:
+
+```bash
+scripts/collect_env.sh
+scripts/run_llama_bench_context.sh configs/<gpu_label>_q8kv.env
+scripts/run_llama_server.sh configs/<gpu_label>_q8kv.env
+python3 scripts/bench_concurrency.py \
+  --out results/raw/<gpu_label>_q8kv_concurrency.csv \
+  --checkpoint results/processed/<gpu_label>_q8kv_concurrency_checkpoint.json
+python3 scripts/plot_results.py --include-reference
+```
+
+Use `docs/2026-07-02_reproduction_p40_gpu1_text_only.md` as the baseline procedure, and keep the same prompt size, generation size, KV cache type, and plot axes unless the comparison intentionally changes them.
+
 ## License
 
 This repository's code, scripts, configuration templates, documentation, and benchmark metadata are licensed under the MIT License. See `LICENSE`.
