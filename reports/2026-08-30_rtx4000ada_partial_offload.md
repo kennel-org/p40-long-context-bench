@@ -68,6 +68,10 @@ llama.cpp selects a flash-attention kernel per shape and compute capability, and
 variant chosen at this depth asks for a larger scratch block than the one chosen at
 32768. That is why the failure is non-monotonic in context length.
 
+**This was fixed upstream.** On llama.cpp build 10703 the same depth completes at
+`-ub 512` — see "Update: llama.cpp build 10703" below. The `-ub` workaround below applies
+to build 9283 only.
+
 Lowering the micro-batch avoids it:
 
 | depth | `-ub` | prefill tok/s | decode tok/s | status |
@@ -109,6 +113,57 @@ here, purely because it has 2.4 GB more VRAM to spend on KV after weights.
 Decode comes within a few percent of the reference at short context. This is a 3B-active
 MoE, so decode moves far less weight per token than the parameter count suggests, which
 compresses the gap between cards. Prefill, which is compute-bound, does not compress.
+
+## Update: llama.cpp build 10703 (same day)
+
+`pr36` was subsequently moved to the current llama.cpp master to verify the latest
+version on that host:
+
+| | before | after |
+|---|---|---|
+| commit | `bbce619ad` | `0b5be7e4a` |
+| build | 9283 | 10703 |
+| version | — | 0.3.0-dev |
+
+Re-measured at the identical shape (`-ngl 39`, `-b 2048 -ub 512 -fa 1`, `q8_0/q8_0`, `r=3`):
+
+| context | prefill tok/s | stddev | decode tok/s | stddev | build 9283 |
+|---:|---:|---:|---:|---:|---|
+| 8192 | 1574.29 | 51.37 | 69.04 | 0.78 | 1619.02 / 68.26 |
+| 16384 | 1540.64 | 38.04 | 65.13 | 0.85 | **abort** |
+| 32768 | 1423.85 | 59.15 | 59.44 | 0.56 | 1069.95 / 57.87 |
+
+**Depth 16384 now completes at `-ub 512`**, where build 9283 aborted three times out of
+three. The flash-attention scratch allocation described above is no longer reached, so
+the `-ub 256` workaround is not needed on this build.
+
+The throughput differences are *not* attributable to the version bump. 32768 prefill
+reads 1423.85 against 1069.95, but build 9283 itself produced 1070-1391 across three runs
+of the same configuration on this interactively-used host, so the new figure sits inside
+the old spread. 8192 went slightly *down* (1619.02 → 1574.29), also within that spread.
+Decode rose a little at all three depths and is the more stable of the two axes. Nothing
+here separates a real version effect from host noise; only the 16384 fix is a firm
+conclusion.
+
+### Rebuild note
+
+The incremental rebuild across 1420 commits failed once, in `scripts/ui-assets.cmake:291`
+while embedding the server web UI. The build directory still held the old asset set
+(`bundle.css`, `bundle.js`, `index.html`, `loading.html`, `checksums.txt`) while the new
+tree additionally requires `manifest.webmanifest`, `sw.js`, `build.json`, `version.json`,
+and `workbox[hash].js`. Deleting the generated `build/tools/ui/dist` directory and
+rebuilding resolved it. Only generated output was removed; `build/` is gitignored.
+
+### Reproducing the build 9283 numbers
+
+`pr36`'s `~/src/llama.cpp` is now on `master`. The earlier measurements need:
+
+```bash
+cd ~/src/llama.cpp && git checkout bbce619adb409880fb6db850a1c5a5f36a4dc7b1
+```
+
+The objects are already local, so no fetch is required. x1ai's `~/src/llama.cpp` was not
+touched and remains at build 9283, so the P40 series is unaffected.
 
 ## Caveats
 
@@ -171,6 +226,7 @@ The existing `~/projects/llama.cpp` working tree on that host was left untouched
 |---|---|
 | context sweep CSV | `results/raw/rtx4000ada_q8kv_ngl39_context.csv` |
 | depth-16384 ubatch variants | `results/raw/rtx4000ada_q8kv_ngl39_d16384_ubatch.csv` |
+| build 10703 verification | `results/raw/rtx4000ada_q8kv_ngl39_build10703_verify.csv` |
 | config | `configs/rtx4000ada_q8kv_ngl39.env` |
 | plot | `results/figures/p40_long_context_summary.png` |
 | P40 baseline | `reports/2026-07-02_p40_llamacpp_qwen_longctx.md` |
@@ -179,6 +235,7 @@ The existing `~/projects/llama.cpp` working tree on that host was left untouched
 ## Follow-ups
 
 - Re-measure prefill when `pr36` is idle, to replace the ±13% spread with a clean figure.
-- Decide whether the canonical shape should move to `-ub 256` so that 16384 is covered on
-  both GPUs, or whether the abort stays recorded as a per-GPU quirk.
+- The `-ub 256` question is closed: build 10703 covers 16384 at `-ub 512`. If the P40
+  series is ever rebuilt on a current llama.cpp, re-test its 192K ceiling too — that
+  failure shares the same allocator.
 - A concurrency sweep on this host would complete the third panel for the Ada.

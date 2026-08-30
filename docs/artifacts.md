@@ -33,6 +33,7 @@
 - `results/raw/p40_usb4_q8kv_concurrency.csv`: concurrency sweep.
 - `results/raw/rtx4000ada_q8kv_ngl39_context.csv`: RTX 4000 Ada context sweep (512-32K, 2026-08-30). Depth 16384 aborts at `-ub 512` and is absent.
 - `results/raw/rtx4000ada_q8kv_ngl39_d16384_ubatch.csv`: depth-16384 runs at `-ub 256` / `-ub 128`, which avoid that abort. Deliberately not named `*_context.csv` so it stays out of the plot.
+- `results/raw/rtx4000ada_q8kv_ngl39_build10703_verify.csv`: same shape re-measured on llama.cpp build 10703 (`0b5be7e4a`), where depth 16384 no longer aborts. A different llama.cpp build than every other series here, so it is deliberately kept out of the `*_context.csv` plot glob.
 - `results/figures/p40_long_context_summary.png`: final plot.
 
 Ignored local artifacts:
