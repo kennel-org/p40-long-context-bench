@@ -10,6 +10,8 @@
 ## Configs
 
 - `configs/p40_usb4_q8kv.env`: measured GPU1 text-only q8 KV configuration.
+- `configs/rtx4000ada_q8kv_ngl39.env`: measured RTX 4000 Ada partial-offload configuration on `pr36-wsl` (2 of 41 layers on CPU; `-ngl 40` and above spill to host RAM).
+- `configs/p40_usb4_q8kv_long.env`: measured GPU1 depth extension (64K/128K/160K/192K). 192K is expected to OOM and is kept in the depth list so a re-run reproduces that result.
 - `configs/p40_oculink_f16kv.env`: planned OCuLink f16 KV configuration.
 - `configs/p40_oculink_q8kv.env`: planned OCuLink q8 KV configuration.
 - `configs/p40_oculink_q8k_q4v.env`: planned q8 K / q4 V configuration.
@@ -26,8 +28,12 @@
 
 ## Results
 
-- `results/raw/p40_usb4_q8kv_context.csv`: `llama-bench` context sweep.
+- `results/raw/p40_usb4_q8kv_context.csv`: `llama-bench` context sweep (512-32K, 2026-07-02).
+- `results/raw/p40_usb4_q8kv_long_context.csv`: `llama-bench` depth extension (64K-160K, 2026-08-30). Plotted as one series with the file above.
 - `results/raw/p40_usb4_q8kv_concurrency.csv`: concurrency sweep.
+- `results/raw/rtx4000ada_q8kv_ngl39_context.csv`: RTX 4000 Ada context sweep (512-32K, 2026-08-30). Depth 16384 aborts at `-ub 512` and is absent.
+- `results/raw/rtx4000ada_q8kv_ngl39_d16384_ubatch.csv`: depth-16384 runs at `-ub 256` / `-ub 128`, which avoid that abort. Deliberately not named `*_context.csv` so it stays out of the plot.
+- `results/raw/rtx4000ada_q8kv_ngl39_build10703_verify.csv`: same shape re-measured on llama.cpp build 10703 (`0b5be7e4a`), where depth 16384 no longer aborts. A different llama.cpp build than every other series here, so it is deliberately kept out of the `*_context.csv` plot glob.
 - `results/figures/p40_long_context_summary.png`: final plot.
 
 Ignored local artifacts:
@@ -35,12 +41,16 @@ Ignored local artifacts:
 - `results/raw/env_20260702_initial.txt`: environment snapshot.
 - `results/raw/p40_usb4_q8kv_server.log`: benchmark server log.
 - `results/raw/p40_usb4_q8kv_context.log`: context sweep progress and stderr.
+- `results/raw/p40_usb4_q8kv_long_context.log`: depth extension progress and the 192K abort.
 - `results/processed/p40_usb4_q8kv_context_checkpoint.json`: context sweep checkpoint.
+- `results/processed/p40_usb4_q8kv_long_context_checkpoint.json`: depth extension checkpoint.
 - `results/processed/p40_usb4_q8kv_concurrency_checkpoint.json`: concurrency checkpoint.
 
 ## Reports
 
-- `reports/2026-07-02_p40_llamacpp_qwen_longctx.md`: measured result summary.
+- `reports/2026-07-02_p40_llamacpp_qwen_longctx.md`: measured result summary (Phases 1 and 3).
+- `reports/2026-08-30_p40_phase2_long_context.md`: Phase 2 depth extension, VRAM ceiling, and OOM analysis.
+- `reports/2026-08-30_rtx4000ada_partial_offload.md`: RTX 4000 Ada partial-offload sweep, the `-ngl` cliff, and WSL VRAM spill behaviour.
 
 ## License
 

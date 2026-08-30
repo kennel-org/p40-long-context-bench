@@ -44,8 +44,11 @@ def normalize_context_csv(path):
         prompt = n_prompt if n_prompt is not None else pd.Series([512] * len(df), index=df.index)
     prompt_for_x = prompt.mask(prompt <= 0, 512)
     x = depth.mask(depth <= 0, prompt_for_x)
+    # depth-extension runs (`<label>_long_context.csv`) belong to the same
+    # measurement series as `<label>_context.csv`, so they plot as one line.
+    series = path.name.removesuffix("_context.csv").removesuffix("_long")
     out = pd.DataFrame({
-        "series": path.name.removesuffix("_context.csv"),
+        "series": series,
         "context": x,
         "speed": pd.to_numeric(df[speed_col], errors="coerce"),
         "kind": "",
