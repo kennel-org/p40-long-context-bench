@@ -5,11 +5,13 @@ Measured GPU1 text-only results are recorded in:
 - `docs/2026-07-02_reproduction_p40_gpu1_text_only.md`
 - `reports/2026-07-02_p40_llamacpp_qwen_longctx.md`
 - `reports/2026-08-30_p40_phase2_long_context.md` (Phase 2 extension)
+- `reports/2026-08-30_rtx4000ada_partial_offload.md` (RTX 4000 Ada, second GPU)
 
 - Phase 1: **done** (2026-07-02, GPU1/USB4 rather than OCuLink). Environment, model metadata, and single-GPU context sweeps at 8K, 16K, and 32K.
 - Phase 2: **done** (2026-08-30). Extended to 64K, 128K, and 160K. 192K OOMs and is recorded as data; the single-P40 ceiling at `q8_0/q8_0` KV is 163840.
 - Phase 3: **done** (2026-07-02). `llama-server` throughput at concurrency 1, 2, 4, 8, 12, and 16.
 - Phase 4: **done**. Figures and reports comparing P40 results to the RTX PRO 6000 reference values from the handoff memo.
+- Second GPU: **done** (2026-08-30). RTX 4000 Ada on `pr36-wsl`, partial offload at `-ngl 39`. 1.8-2.5x the P40 on prefill, ~1.5x on decode, but capped at a far shorter context.
 - Remaining: OCuLink configs (`f16kv`, `q8kv`, `q8k_q4v`) and the dual P40 layer split are still unmeasured. Reaching 192K needs the dual-GPU split, which requires GPU0.
 
 Comparison rows (filled 2026-08-30; see `reports/2026-08-30_p40_phase2_long_context.md`):

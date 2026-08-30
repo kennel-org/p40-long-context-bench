@@ -50,6 +50,7 @@ python3 scripts/plot_results.py \
 - Script guide: `scripts/README.md`
 - Result report: `reports/2026-07-02_p40_llamacpp_qwen_longctx.md`
 - Long-context extension and VRAM ceiling: `reports/2026-08-30_p40_phase2_long_context.md`
+- Second GPU (RTX 4000 Ada, partial offload): `reports/2026-08-30_rtx4000ada_partial_offload.md`
 
 ## Current GPU1 Text-Only Run
 
