@@ -1,10 +1,10 @@
 # p40-long-context-bench
 
-> **Status: superseded (read-only history).** On 2026-10-11 this code was consolidated into
+> **Status: superseded and archived (read-only history).** On 2026-10-11 this code was consolidated into
 > [`kennel-org/local-llm-workbench`](https://github.com/kennel-org/local-llm-workbench) at
 > `packages/p40-long-context-bench`. Develop there, not here. The consolidated copy also adds
-> `tests/test_smoke.py`, which this repository does not have. This repository is not archived on GitHub yet;
-> archiving needs a per-repository owner approval (tracked in local-llm-workbench#96).
+> `tests/test_smoke.py`, which this repository does not have. This repository was archived on GitHub
+> (read-only) on 2026-11-04 after owner approval (tracked in local-llm-workbench#96).
 
 Benchmarking long-context LLM inference on Tesla P40 + llama.cpp.
 
