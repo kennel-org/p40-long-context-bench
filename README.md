@@ -4,7 +4,7 @@
 > [`kennel-org/local-llm-workbench`](https://github.com/kennel-org/local-llm-workbench) at
 > `packages/p40-long-context-bench`. Develop there, not here. The consolidated copy also adds
 > `tests/test_smoke.py`, which this repository does not have. This repository was archived on GitHub
-> (read-only) on 2026-11-04 after owner approval (tracked in local-llm-workbench#96).
+> (read-only) on 2026-11-04 after owner approval (tracked in kennel-org/local-llm-workbench#96).
 
 Benchmarking long-context LLM inference on Tesla P40 + llama.cpp.
 
